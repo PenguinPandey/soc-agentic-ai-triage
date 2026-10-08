@@ -1,0 +1,37 @@
+digraph TOBE {
+  graph [rankdir=TB, fontname="Times-Roman", fontsize=20, nodesep=0.4, ranksep=0.5, pad=0.3, dpi=200];
+  node  [fontname="Times-Roman", fontsize=13, shape=box, style="rounded,filled", margin="0.15,0.08", color="#444444"];
+  edge  [fontname="Times-Roman", fontsize=11, color="#555555"];
+
+  alert [label="Security alert arrives\n(SIEM / EDR / IDS / Email / VPN)", shape=cylinder, fillcolor="#DCE6F2"];
+  ui    [label="[A] Streamlit UI submits alert\nto n8n webhook", fillcolor="#D9EFD9"];
+  orch  [label="[A] SOC Orchestrator (n8n)\nroutes alert, tracks state, logs every step", fillcolor="#D9EFD9"];
+  gin   [label="[A] Input Guardrail\nprompt-injection scan, redaction,\nremove untrusted instructions", fillcolor="#D9EFD9"];
+  corr  [label="[A] Alert Correlation Agent\nrelated alerts by user / host / IP", fillcolor="#D9EFD9"];
+  ti    [label="[A] Threat Intelligence Agent\nIP / domain / hash reputation", fillcolor="#D9EFD9"];
+  asset [label="[A] Asset Context Agent\nhost criticality, user role,\nmaintenance window, HR flag", fillcolor="#D9EFD9"];
+  inc   [label="Evidence\ncomplete?", shape=diamond, style=filled, fillcolor="#FFF2CC"];
+  gap   [label="[H] Flag gap, analyst\nrequests missing context", fillcolor="#FFE0B3"];
+  risk  [label="[A] Risk / Prioritisation Agent (open LLM)\nseverity, score, route, confidence, reasoning", fillcolor="#D9EFD9"];
+  pol   [label="[A] Policy Guardrail (rules, not LLM)\nblock auto-close on critical asset, malicious IOC,\ninjection, low confidence; force escalation if high", fillcolor="#D9EFD9"];
+  rt    [label="Route?", shape=diamond, style=filled, fillcolor="#FFF2CC"];
+  ac    [label="[A] Propose auto-close\n(logged, reopenable)", fillcolor="#D9EFD9"];
+  ar    [label="[H] Analyst review queue", fillcolor="#FFE0B3"];
+  es    [label="[E] Escalate to IR lead\nwith evidence pack", fillcolor="#F8C9C9"];
+  summ  [label="[A] Incident Summary Agent\nplain-language summary + next steps", fillcolor="#D9EFD9"];
+  hum   [label="[H] Human SOC Analyst decision\napprove / override / reject", fillcolor="#FFE0B3", penwidth=2];
+  act   [label="[H] High-impact action (isolate host,\ndisable account, block IP)\nONLY after explicit human approval", fillcolor="#FFE0B3", penwidth=2];
+  audit [label="[A] Tamper-evident audit log\n(hash-chained) + metrics", shape=cylinder, fillcolor="#DCE6F2"];
+  exc   [label="Exception path: model error / bad JSON /\nn8n down  ->  rule-based fallback, flagged to analyst", shape=note, fillcolor="#FFFFFF", color="#B00020"];
+
+  alert -> ui -> orch -> gin -> corr -> ti -> asset -> inc;
+  inc -> gap [label="no"]; gap -> risk [label="re-run"];
+  inc -> risk [label="yes"];
+  risk -> pol -> rt;
+  rt -> ac [label="low"]; rt -> ar [label="medium"]; rt -> es [label="high / critical"];
+  ac -> summ; ar -> summ; es -> summ;
+  summ -> hum; hum -> act [label="approved + needs action"];
+  hum -> audit; act -> audit;
+  es -> hum [style=dashed, label="immediate notify", constraint=false];
+  risk -> exc [style=dashed, color="#B00020", constraint=false];
+}

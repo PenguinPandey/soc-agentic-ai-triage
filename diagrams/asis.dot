@@ -1,0 +1,37 @@
+digraph ASIS {
+  graph [rankdir=TB, fontname="Times-Roman", fontsize=20, nodesep=0.45, ranksep=0.55, pad=0.3, dpi=200, newrank=true];
+  node  [fontname="Times-Roman", fontsize=13, shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#444444", margin="0.15,0.08"];
+  edge  [fontname="Times-Roman", fontsize=11, color="#555555"];
+
+  subgraph cluster_tools { label="Security tools and data sources"; style="rounded,filled"; fillcolor="#EEF2F7"; color="#9AA8B8";
+    siem [label="SIEM / EDR / IDS / Email / VPN\ngenerate alerts (high volume,\nmany false positives)", shape=cylinder, fillcolor="#DCE6F2"]; }
+  subgraph cluster_t1 { label="Tier-1 SOC Analyst"; style="rounded,filled"; fillcolor="#FFF8E7"; color="#C9B27C";
+    q   [label="Alert queue\n(manual pick-up)"];
+    chk [label="Read alert, check rule\nand basic fields"];
+    dup [label="Search logs in several\nconsoles to correlate", fillcolor="#FFE3E3"];
+    ti  [label="Look up IP / domain / hash\nin TI portals by hand", fillcolor="#FFE3E3"];
+    d1  [label="Obviously\nbenign?", shape=diamond, style="filled", fillcolor="#FFF2CC"];
+    close1 [label="Close with note", fillcolor="#E4F2E4"];
+    ticket [label="Write ticket / notes\nby hand", fillcolor="#FFE3E3"]; }
+  subgraph cluster_own { label="Asset owner / IT / HR / other teams"; style="rounded,filled"; fillcolor="#F1EAF7"; color="#A58BC0";
+    ask [label="Email / chat to ask:\nIs this host critical?\nIs this user travelling?\nIs a change approved?", fillcolor="#FFE3E3"];
+    wait [label="WAIT for reply\n(minutes to hours)", fillcolor="#FFB3B3", color="#B00020", fontcolor="#7A0014"]; }
+  subgraph cluster_t2 { label="Tier-2 / Incident Response"; style="rounded,filled"; fillcolor="#E9F5EC"; color="#8CBF9A";
+    d2 [label="Severity and\nescalate?", shape=diamond, style="filled", fillcolor="#FFF2CC"];
+    t2 [label="Deeper investigation,\nscope and impact"];
+    resp [label="Containment decision\n(isolate host / block account)\nneeds approval", fillcolor="#FFE3E3"];
+    mgr [label="SOC manager / IR lead\nescalation call or email"]; }
+
+  siem -> q [label="alert flood"];
+  q -> chk -> dup -> ti -> d1;
+  d1 -> close1 [label="yes"];
+  d1 -> ask [label="no / unsure"];
+  ask -> wait -> d2 [label="context arrives\n(often incomplete)"];
+  d2 -> ticket [label="low / medium"];
+  d2 -> t2 [label="high"];
+  t2 -> resp -> mgr;
+  ticket -> t2 [style=dashed, label="handoff,\ncontext lost"];
+  close1 -> note [style=invis];
+  note [shape=note, fillcolor="#FFFFFF", fontsize=12, label="Pain points\n1. Alert fatigue and queue backlog\n2. Evidence scattered across tools\n3. Manual enrichment is slow and inconsistent\n4. Waiting on other teams for asset/user context\n5. Handoff losses between tiers\n6. Exceptions (odd travel, admin scripts, insider\n    activity) depend on individual judgement\n7. Weak audit trail of why a decision was made", color="#B00020"];
+  mgr -> note [style=invis];
+}

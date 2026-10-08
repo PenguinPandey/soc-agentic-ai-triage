@@ -1,0 +1,31 @@
+digraph ARCH {
+  graph [rankdir=TB, fontname="Times-Roman", fontsize=20, nodesep=0.35, ranksep=0.45, pad=0.3, dpi=200, compound=true];
+  node  [fontname="Times-Roman", fontsize=13, shape=box, style="rounded,filled", margin="0.15,0.08", color="#444444", fillcolor="#FFFFFF"];
+  edge  [fontname="Times-Roman", fontsize=11, color="#555555"];
+
+  subgraph cluster_ui { label="1. UI / UX layer"; style="rounded,filled"; fillcolor="#E6F0FB"; color="#8FB0D8";
+    s1 [label="Streamlit app\nalert selector, results, evidence,\nhuman approve / override / reject"]; }
+  subgraph cluster_wf { label="2. Workflow / orchestration layer"; style="rounded,filled"; fillcolor="#EAF6EA"; color="#8CBF8C";
+    n8n [label="n8n workflow\nwebhook, conditional routing (Switch),\nerror handling, response"]; }
+  subgraph cluster_ag { label="3. Agents and LLMs"; style="rounded,filled"; fillcolor="#FFF6DD"; color="#D1B867";
+    a1 [label="Correlation Agent"]; a2 [label="Threat Intel Agent"]; a3 [label="Asset Context Agent"];
+    a4 [label="Risk / Prioritisation Agent"]; a5 [label="Incident Summary Agent"];
+    llm [label="Open-weight LLMs via OpenAI-compatible API\nModel A  |  Model B  |  Model C\n(same prompt, evidence, JSON schema)", shape=component, fillcolor="#FFEFB0"]; }
+  subgraph cluster_td { label="4. Tools and data (synthetic)"; style="rounded,filled"; fillcolor="#F1EAF7"; color="#A58BC0";
+    d1 [label="Alert queue\n(alerts.json)", shape=cylinder]; d2 [label="Threat-intel feed\n(threat_intel.json)", shape=cylinder];
+    d3 [label="Asset / user inventory\n(assets.json)", shape=cylinder]; api [label="Flask tool API"]; }
+  subgraph cluster_gr { label="5. Guardrails"; style="rounded,filled"; fillcolor="#FDE9E9"; color="#D88C8C";
+    g1 [label="Data: synthetic only, redaction,\nno secrets in prompts"]; g2 [label="Model: injection scan,\nJSON schema validation, fallback"];
+    g3 [label="Action: policy rules, thresholds,\nno autonomous containment"]; }
+  subgraph cluster_ho { label="6. Human oversight and audit"; style="rounded,filled"; fillcolor="#FFEEDD"; color="#E0A56B";
+    h1 [label="SOC analyst approval\n(all response actions)"]; h2 [label="IR lead escalation"];
+    h3 [label="Hash-chained audit log\nmetrics, benchmark CSV", shape=cylinder]; }
+
+  s1 -> n8n [label="HTTP webhook"]; n8n -> api [label="HTTP"];
+  api -> a1; api -> a2; api -> a3; api -> a4; api -> a5;
+  a4 -> llm; a5 -> llm;
+  a1 -> d1; a2 -> d2; a3 -> d3;
+  g1 -> api [style=dashed, label="enforced in", constraint=false]; g2 -> a4 [style=dashed, constraint=false]; g3 -> n8n [style=dashed, constraint=false];
+  n8n -> h1 [label="result"]; h1 -> h2 [label="escalate"]; h1 -> h3; n8n -> h3 [style=dashed];
+  s1 -> h1 [style=dashed, label="decision UI", constraint=false];
+}

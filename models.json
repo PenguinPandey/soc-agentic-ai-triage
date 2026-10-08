@@ -1,0 +1,35 @@
+{
+  "_selection_note": "Models chosen by the assistant with the team's delegated approval (2026-10-08). Rationale: all three are open-weight, instruction-tuned, support JSON output, are served by the same provider (OpenRouter) so inference conditions are identical, and come from three different developers. Sizes differ (72B / 70B / 24B), so the comparison is of practical deployment options, not a size-controlled study. VERIFY each model_id exists on openrouter.ai/models on the day of the run; if one is retired, substitute the nearest sibling and update the report (Table 2).",
+  "qwen": {
+    "label": "Qwen2.5 72B Instruct",
+    "base_url": "https://openrouter.ai/api/v1",
+    "model_id": "qwen/qwen-2.5-72b-instruct",
+    "api_key_env": "OPENROUTER_API_KEY",
+    "params": "72B",
+    "developer": "Alibaba Cloud (Qwen Team)"
+  },
+  "llama": {
+    "label": "Llama 3.3 70B Instruct",
+    "base_url": "https://openrouter.ai/api/v1",
+    "model_id": "meta-llama/llama-3.3-70b-instruct",
+    "api_key_env": "OPENROUTER_API_KEY",
+    "params": "70B",
+    "developer": "Meta"
+  },
+  "mistral": {
+    "label": "Mistral Small 3.1 24B Instruct",
+    "base_url": "https://openrouter.ai/api/v1",
+    "model_id": "mistralai/mistral-small-3.1-24b-instruct",
+    "api_key_env": "OPENROUTER_API_KEY",
+    "params": "24B",
+    "developer": "Mistral AI"
+  },
+  "baseline": {
+    "label": "Rule-based baseline (no LLM)",
+    "base_url": "",
+    "model_id": "rules",
+    "api_key_env": "NONE",
+    "params": "n/a",
+    "developer": "authors"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "ips": {
+    "198.51.100.77": {"reputation": "suspicious", "note": "Seen in VPN credential-stuffing reports (synthetic feed)", "confidence": 0.55},
+    "203.0.113.50": {"reputation": "malicious", "note": "Known ransomware C2 infrastructure (synthetic feed)", "confidence": 0.95},
+    "203.0.113.99": {"reputation": "malicious", "note": "Linked to adversary-in-the-middle phishing kits (synthetic feed)", "confidence": 0.85}
+  },
+  "domains": {
+    "login-portal-example.invalid": {"reputation": "malicious", "note": "Credential-harvesting domain registered 2 days ago (synthetic feed)", "confidence": 0.9},
+    "personal-cloud.example": {"reputation": "unclassified", "note": "Consumer file-sharing service", "confidence": 0.3}
+  },
+  "hashes": {
+    "9f2c1b7a4e5d6c3b8a1f0e2d4c6b8a7f": {"reputation": "malicious", "note": "Ransomware family sample (synthetic feed)", "confidence": 0.97},
+    "44d88612fea8a8f36de82e1278abb02f": {"reputation": "benign", "note": "EICAR standard antivirus test file", "confidence": 0.99}
+  },
+  "default": {"reputation": "unknown", "note": "No intelligence available", "confidence": 0.0}
+}

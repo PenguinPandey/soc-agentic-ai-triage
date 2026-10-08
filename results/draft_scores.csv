@@ -1,0 +1,28 @@
+model,alert_id,claude_draft_hallucination_1to5,claude_draft_explanation_1to5,note
+qwen,A-001,5,3,All claims supported; does not say why review is needed
+qwen,A-002,5,4,Supported (Romania, India, MFA, credential-stuffing note)
+qwen,A-003,4,5,"Supported; 'financial data compromised' is an inference beyond the evidence"
+qwen,A-004,5,4,Supported (unknown src IP reputation is in evidence)
+qwen,A-005,5,4,Supported
+qwen,A-006,4,4,"Supported; states 'compromised' as fact when evidence shows indicators"
+qwen,A-007,5,4,Supported (domain registered 2 days ago is in TI note)
+qwen,A-008,5,4,Supported (maintenance window in evidence)
+qwen,A-009,5,4,Supported; exfiltration is hedged with 'suggests'
+llama,A-001,5,2,Supported but too terse to justify review
+llama,A-002,5,2,Supported; terse
+llama,A-003,5,3,Supported; cites evidence field
+llama,A-004,5,3,Supported
+llama,A-005,5,3,Supported
+llama,A-006,5,3,Supported; cites evidence fields
+llama,A-007,5,3,Supported (0.9 confidence is in evidence)
+llama,A-008,5,4,Supported; cites asset.host_context.type
+llama,A-009,5,2,Supported; terse and does not justify escalation
+mistral,A-001,5,3,Supported
+mistral,A-002,5,4,Supported
+mistral,A-003,5,4,Supported
+mistral,A-004,5,4,Supported
+mistral,A-005,5,3,Supported; correctly notes missing hash and domain
+mistral,A-006,5,4,Supported
+mistral,A-007,5,3,Supported but does not justify choosing review for a high-severity case or mention injection flag
+mistral,A-008,5,4,Supported
+mistral,A-009,5,4,Supported (confidential data is in host context)

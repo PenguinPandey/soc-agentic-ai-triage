@@ -1,0 +1,467 @@
+{
+  "name": "SOC Governed Agentic Triage",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "soc-triage",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Alert Webhook (from UI)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        300
+      ],
+      "webhookId": "soc-triage"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5001/guardrail",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({alert: $('Alert Webhook (from UI)').item.json.body.alert}) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "name": "Input Guardrail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5001/correlate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({alert: $('Alert Webhook (from UI)').item.json.body.alert}) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "name": "Alert Correlation Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        780,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5001/threat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({alert: $('Alert Webhook (from UI)').item.json.body.alert}) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "name": "Threat Intelligence Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5001/asset",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({alert: $('Alert Webhook (from UI)').item.json.body.alert}) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "name": "Asset Context Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1300,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $('Alert Webhook (from UI)').item.json.body;\nconst g = $('Input Guardrail').item.json;\nconst evidence = {\n  alert: g.safe_alert || body.alert,\n  guardrail: {injection_detected: !!g.injection_detected},\n  correlation: $('Alert Correlation Agent').item.json,\n  threat: $('Threat Intelligence Agent').item.json,\n  asset: $('Asset Context Agent').item.json\n};\n// Exception handling: flag incomplete evidence instead of failing silently\nevidence.incomplete = !evidence.threat.indicators || !evidence.asset.host_context;\nreturn [{json: {evidence, model: body.model || 'baseline', alert_id: body.alert.id}}];"
+      },
+      "name": "Build Evidence Pack",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5001/risk",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({evidence: $json.evidence, model: $json.model}) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "name": "Risk / Prioritisation Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.risk.route }}",
+                    "rightValue": "escalate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                }
+              },
+              "renameOutput": true,
+              "outputKey": "ESCALATE (E)"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.risk.route }}",
+                    "rightValue": "analyst_review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                }
+              },
+              "renameOutput": true,
+              "outputKey": "ANALYST REVIEW (H)"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "name": "Route Decision",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        2080,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "workflow_status",
+              "type": "string",
+              "value": "ESCALATED: IR lead notified, containment awaits human approval"
+            }
+          ]
+        },
+        "includeOtherFields": true
+      },
+      "name": "Escalation Notice (E)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "workflow_status",
+              "type": "string",
+              "value": "PENDING HUMAN REVIEW"
+            }
+          ]
+        },
+        "includeOtherFields": true
+      },
+      "name": "Queue for Analyst (H)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2600,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "workflow_status",
+              "type": "string",
+              "value": "PROPOSED CLOSE: logged, analyst can reopen"
+            }
+          ]
+        },
+        "includeOtherFields": true
+      },
+      "name": "Proposed Auto-Close (A, logged)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2860,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5001/summary",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({evidence: $('Build Evidence Pack').item.json.evidence, risk: $('Risk / Prioritisation Agent').item.json.risk, model: $('Build Evidence Pack').item.json.model}) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "name": "Incident Summary Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3120,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $('Build Evidence Pack').item.json;\nconst r = $('Risk / Prioritisation Agent').item.json;\nconst status = ($('Escalation Notice (E)').isExecuted ? 'ESCALATED' : $('Queue for Analyst (H)').isExecuted ? 'PENDING HUMAN REVIEW' : 'PROPOSED CLOSE');\nreturn [{json: {alert_id: b.alert_id, evidence: b.evidence, risk: r.risk, model_output: r.risk,\n  meta: r.meta, summary: $json, workflow_status: status}}];"
+      },
+      "name": "Assemble Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3380,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to UI",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        3640,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Alert Webhook (from UI)": {
+      "main": [
+        [
+          {
+            "node": "Input Guardrail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input Guardrail": {
+      "main": [
+        [
+          {
+            "node": "Alert Correlation Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Correlation Agent": {
+      "main": [
+        [
+          {
+            "node": "Threat Intelligence Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Threat Intelligence Agent": {
+      "main": [
+        [
+          {
+            "node": "Asset Context Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asset Context Agent": {
+      "main": [
+        [
+          {
+            "node": "Build Evidence Pack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Evidence Pack": {
+      "main": [
+        [
+          {
+            "node": "Risk / Prioritisation Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk / Prioritisation Agent": {
+      "main": [
+        [
+          {
+            "node": "Route Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Decision": {
+      "main": [
+        [
+          {
+            "node": "Escalation Notice (E)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Queue for Analyst (H)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Proposed Auto-Close (A, logged)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalation Notice (E)": {
+      "main": [
+        [
+          {
+            "node": "Incident Summary Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue for Analyst (H)": {
+      "main": [
+        [
+          {
+            "node": "Incident Summary Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proposed Auto-Close (A, logged)": {
+      "main": [
+        [
+          {
+            "node": "Incident Summary Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Incident Summary Agent": {
+      "main": [
+        [
+          {
+            "node": "Assemble Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to UI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

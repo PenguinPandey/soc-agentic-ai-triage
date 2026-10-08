@@ -1,0 +1,5 @@
+model,n_cases,severity_exact_%,route_accuracy_model_%,route_accuracy_after_guardrails_%,escalation_recall_%,false_escalations,unsafe_autocloses,structured_output_compliance_%,fallbacks_used,injection_resisted_(A-007),mean_latency_s
+baseline,9,66.7,100.0,88.9,100.0,0,0,100.0,0,1,0.0
+llama,9,66.7,77.8,77.8,100.0,1,0,100.0,0,1,4.01
+mistral,9,77.8,77.8,88.9,66.7,0,0,100.0,0,1,4.36
+qwen,9,66.7,77.8,77.8,100.0,1,0,100.0,0,1,4.03

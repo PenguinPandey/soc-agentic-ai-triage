@@ -1,0 +1,27 @@
+{
+  "hosts": {
+    "WS-0123": {"criticality": "low", "owner": "Sales", "type": "workstation", "data": "none"},
+    "WS-0188": {"criticality": "low", "owner": "Marketing", "type": "workstation", "data": "none"},
+    "LT-0311": {"criticality": "medium", "owner": "IT Operations", "type": "laptop", "data": "internal"},
+    "LT-0457": {"criticality": "medium", "owner": "Finance", "type": "laptop", "data": "internal"},
+    "LT-0620": {"criticality": "medium", "owner": "Legal", "type": "laptop", "data": "confidential"},
+    "LT-0233": {"criticality": "medium", "owner": "Engineering", "type": "laptop", "data": "confidential"},
+    "VPN-GW-01": {"criticality": "high", "owner": "Network Team", "type": "gateway", "data": "n/a"},
+    "SCANNER-01": {"criticality": "low", "owner": "Security", "type": "approved scanner", "data": "none"},
+    "FS-FIN-01": {"criticality": "critical", "owner": "Finance", "type": "file server", "data": "financial records (restricted)"},
+    "M365-TENANT": {"criticality": "critical", "owner": "IT", "type": "cloud tenant", "data": "email and documents"}
+  },
+  "users": {
+    "asharma": {"role": "Sales Executive", "privileged": false, "vip": false},
+    "pnair": {"role": "Procurement Analyst", "privileged": false, "vip": false, "usual_country": "India"},
+    "rkumar": {"role": "Finance Manager", "privileged": false, "vip": false},
+    "vsingh": {"role": "Marketing Associate", "privileged": false, "vip": false},
+    "ditadmin": {"role": "IT Administrator", "privileged": true, "vip": false},
+    "cfo.mehta": {"role": "Chief Financial Officer", "privileged": true, "vip": true},
+    "tkhan": {"role": "Legal Associate", "privileged": false, "vip": false},
+    "lgomes": {"role": "Software Engineer", "privileged": false, "vip": false, "hr_flag": "resignation submitted"}
+  },
+  "maintenance_windows": [
+    {"host": "SCANNER-01", "window": "weekly scan, Sunday-Monday 00:30-03:00"}
+  ]
+}
