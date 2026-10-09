@@ -22,7 +22,7 @@ Each step is classified A (autonomous), H (human-in-the-loop) or E (escalation).
 | `n8n/soc_triage_workflow.json` | The n8n workflow (import into n8n) |
 | `models.json` | The three open-weight models and the rule-based baseline |
 | `data/` | Synthetic alerts, assets and threat intelligence |
-| `results/` | Benchmark output of the valid run (run 2) and the draft manual scores |
+| `results/` | Benchmark output of the valid run (run 2) and the per-item hallucination and explanation scores (`final_scores.csv`) |
 | `diagrams/`, `screenshots/` | AS-IS, TO-BE and architecture diagrams, and screenshots of the running system |
 
 ## Models compared
@@ -57,7 +57,7 @@ Without an API key, `LLM_MODE=mock` runs the rule-based engine only.
 python benchmark.py qwen llama mistral baseline
 ```
 
-Writes `results/benchmark_results.csv` and `results/benchmark_summary.csv`. Hallucination and explanation quality are scored manually (1 to 5) from the `reasoning` column.
+Writes `results/benchmark_results.csv` and `results/benchmark_summary.csv`. Hallucination and explanation quality are scored (1 to 5) from the `reasoning` column; the scores in `results/final_scores.csv` were assigned by an AI assistant in two claim-by-claim passes, not by independent human raters.
 
 ## Governance controls (mapped to NIST AI RMF 1.0 and the GenAI Profile, with ISO/IEC 27001:2022 cross-references in the report)
 
@@ -69,4 +69,4 @@ Writes `results/benchmark_results.csv` and `results/benchmark_summary.csv`. Hall
 
 ## Limitations
 
-Nine synthetic benchmark alerts and single runs per model, so the comparison is indicative, not statistically conclusive. Expert validation is not included in this version. See the report for details.
+Nine synthetic benchmark alerts and single runs per model, so the comparison is indicative, not statistically conclusive. There is no SOC-specific expert validation: the one expert interview covered a related fraud-investigation workflow. See the report for details.

@@ -143,7 +143,7 @@ footer{padding:32px 0 56px;color:var(--muted);font-size:14px}
 <li>No model auto-closed a real threat, and all three resisted the prompt-injection alert (A-007).</li>
 <li>Qwen and Llama missed no escalation but escalated one alert that did not need it. Mistral escalated nothing unnecessarily but its own output missed one escalation (A-007); the policy guardrail then forced it to escalate.</li>
 <li>The guardrails changed the outcome in some cases, which is their purpose. The comparison is small and each model ran once, so differences are indicative, not statistically conclusive.</li>
-<li>Hallucination and explanation quality are scored by hand against the evidence. The scores and the full results are in the report and in the repository.</li>
+<li>Hallucination (1 to 5, higher is better): Qwen 4.78, Llama 5.00, Mistral 5.00. Explanation quality (1 to 5): Qwen 4.11, Llama 3.00, Mistral 3.78. Llama's answers were short fragments, so it had few claims that could be wrong but also the thinnest explanations. These scores come from an AI assistant checking every claim against the evidence in two passes, not from independent human raters, so treat them as indicative. Per-item scores are in <code>results/final_scores.csv</code>.</li>
 </ul>
 <p class="muted">A first run was discarded because ground-truth labels had leaked into the model prompts. The leak was fixed and all results above come from the corrected run. The report documents this.</p>
 </div></section>
@@ -165,7 +165,7 @@ footer{padding:32px 0 56px;color:var(--muted);font-size:14px}
 <h2>Limitations</h2>
 <ul>
 <li><b>Small, synthetic test set.</b> Nine alerts and one run per model. Results show how the system behaves, not how it would perform on a real SOC's traffic.</li>
-<li><b>Expert validation is not included in this version.</b> The process, architecture and guardrails have not yet been reviewed by a practising SOC professional.</li>
+<li><b>No SOC-specific expert validation.</b> We interviewed an information-security professional, but the questions covered a related fraud-investigation workflow, so the interview informs the design without validating it. The report records the answers and the gaps they expose.</li>
 <li><b>Hosted models.</b> Inference runs through a third-party provider. A real deployment with sensitive alerts would need self-hosting or a data-processing agreement.</li>
 <li><b>Prototype scope.</b> Threat-intelligence and asset data are small local files, and no response action is connected.</li>
 </ul>
