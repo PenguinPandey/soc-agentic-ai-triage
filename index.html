@@ -189,11 +189,14 @@ footer{padding:32px 0 56px;color:var(--muted);font-size:14px}
 <footer><div class="wrap">Academic project. Synthetic data only; no real credentials, customer data or personal data. Models and tools are named for identification; no endorsement is implied.</div></footer>
 
 <script>
-/* Paste the YouTube video ID between the quotes, e.g. "dQw4w9WgXcQ". Leave empty until the video is uploaded. */
-var VIDEO_ID = "";
+/* Demo video hosted on Google Drive (view link, anyone with the link). */
+var VIDEO_ID = "1OOCTPXsYc5MZ43KLmfEHheGtLBut_z-2";
 if (VIDEO_ID) {
   var box = document.getElementById("video");
-  box.innerHTML = '<iframe src="https://www.youtube.com/embed/' + VIDEO_ID + '" title="Demo video" allowfullscreen loading="lazy"></iframe>';
+  box.innerHTML = '<iframe src="https://drive.google.com/file/d/' + VIDEO_ID + '/preview" title="Demo video" allow="autoplay" allowfullscreen loading="lazy"></iframe>';
+  var p = document.createElement("p");
+  p.innerHTML = 'If the player does not load, <a href="https://drive.google.com/file/d/' + VIDEO_ID + '/view?usp=drive_link" target="_blank" rel="noopener">open the demo video in Google Drive</a>.';
+  box.parentNode.insertBefore(p, box.nextSibling);
 }
 </script>
 </body>
